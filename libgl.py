@@ -165,12 +165,10 @@ def needCacheRowUpdate(elem, dict):
 	perform = False
 	if str(elem) not in dict:
 		perform=True
-	#	print("Not found in cache")
 	else:
-		border = datetime.now() - timedelta(weeks=1)
+		border = datetime.now() - timedelta(weeks=10)
 		try:
 			if  (border >= datetime.strptime(dict[str(elem)]["cache_timestamp"], '%Y/%m/%d %H:%M:%S')):
-				#print (border.strftime('%Y/%m/%d %H:%M:%S'))
 				perform=True
 				
 		except:
@@ -218,7 +216,6 @@ def performCacheRowUpdateSingleRow(req, headers_send, cookies_send=None):
 	
 def getALLEmp():
 	global emp_all
-	print("getALLEmp")
 	if (needCacheRowUpdateSingleRow(emp_all, 1) == True):
 		emp_all = performCacheRowUpdateSingleRow('https://portal-ua.globallogic.com/officetime/json/employees.php', headers, cookies)
 
@@ -227,7 +224,6 @@ def getALLEmp():
 	
 def getAllLocations(headers_map):
 	global locations_all
-	print("getAllLocations")
 	if (needCacheRowUpdateSingleRow(locations_all, 8) == True):
 		locations_all = performCacheRowUpdateSingleRow('https://portal-apps.globallogic.com/officemap/api/v1/locations', headers_map)
 			
@@ -244,7 +240,6 @@ def printLocation(locations):
 
 	
 def searchLocation(locations, zone_name):
-	print("searchLocation in "+zone_name)
 	results=[]
 	for country in locations["countries"]:
 		for city in country["cities"]:
@@ -281,7 +276,6 @@ def getPlaceInfo(id):
 
 def searchSeat(locs, first_name, last_name):
 	seats=[]
-	print("searchSeat " + str(first_name) + str(last_name))
 	try:
 		full_name =  first_name+" "+last_name
 	except:
@@ -312,7 +306,7 @@ def searchSeat(locs, first_name, last_name):
 					pass
 					
 	return seats
-	
+
 def searchSeatUsername(locs, username):
 	seats=[]
 	for loc in locs:
@@ -477,6 +471,7 @@ def searchByName(args, open=False, detect_loc=True, working_hours_period = 0):
 	
 def searchEmpsByProject(project_name, detect_loc, working_hours_period):
 	res = []
+	searchedLoc = []
 	employees = getALLEmp()
 	locations = getAllLocations(headers_map)
 	timestamp_days = int(working_hours_period[0])
@@ -490,33 +485,29 @@ def searchEmpsByProject(project_name, detect_loc, working_hours_period):
 		if loc != None:
 			seats = searchSeat(loc,  emp["first_name"], emp["last_name"])
 			if seats != None:
-					for seat in seats:
-						if (seat["emp_info"]["client"]["project"]["name"].find(str(project_name)) != -1) or \
-							(seat["emp_info"]["client"]["name"].find(str(project_name)) != -1):
-							el = dict()
-					
-							el["basic_emp_info"] = emp
-							el["location_url"] = "https://portal-ua.globallogic.com/officetime/#table/"+emp["zone"]+"/"+str(emp["uid"])+"/week/0"
-							if detect_loc:
-								where = whereEmp(emp["zone"], emp["uid"])
-								el["last_known_location"] = where
-								
-							el["seats"] = seats	
+				for seat in seats:
+					if (seat["emp_info"]["client"]["project"]["name"].find(str(project_name)) != -1) or \
+						(seat["emp_info"]["client"]["name"].find(str(project_name)) != -1):
+						el = dict()
+				
+						el["basic_emp_info"] = emp
+						el["location_url"] = "https://portal-ua.globallogic.com/officetime/#table/"+emp["zone"]+"/"+str(emp["uid"])+"/week/0"
+						if detect_loc:
+							where = whereEmp(emp["zone"], emp["uid"])
+							el["last_known_location"] = where
 							
-							if  timestamp_days > 0:
-								el["worked_hours"] = getEmpWorkingHours(emp["zone"], emp["uid"], round(timestamp_from), round((datetime.now()).timestamp() * 1000))
-	
-								if (round(timestamp_from) > round(seat["ext_info"]["joining_time"] * 1000)):
-									el["do_not_stat"] = False
-								else:
-									el["do_not_stat"] = True
-									
-								#print(round(timestamp_from))
-								#print(round(int(seat["ext_info"]["joining_time"]) * 1000))	
-								#print(el["do_not_stat"] )
+						el["seats"] = seats	
+						
+						if  timestamp_days > 0:
+							el["worked_hours"] = getEmpWorkingHours(emp["zone"], emp["uid"], round(timestamp_from), round((datetime.now()).timestamp() * 1000))
 
-							res.append(el)
-							break
+							if (round(timestamp_from) > round(seat["ext_info"]["joining_time"] * 1000)):
+								el["do_not_stat"] = False
+							else:
+								el["do_not_stat"] = True
+						res.append(el)
+						break
+
 
 	return res
 	
