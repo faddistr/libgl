@@ -16,7 +16,7 @@ from datetime import datetime, timedelta
 def grepErpDateOptions(cont):
 	res = []
 	pos = 0
-	searchText = "<option value=\""
+	searchText = "value=\""
 	while pos != -1:
 		pos = cont.find(searchText)
 		cont = cont[pos + len(searchText):]
@@ -402,7 +402,7 @@ def main():
 		period, wh = checkFor(settings['username'], settings['erp_cookies'], date)
 	except Exception as e:
 		print (str(e))
-		sys.exit('Authorization error(erp_cookies refresh(2))')
+		sys.exit('Error(3)')
 
 	fillFor(settings['username'], settings['password'], period, wh, args.w)
 
