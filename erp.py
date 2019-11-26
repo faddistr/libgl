@@ -301,6 +301,11 @@ def getInputs(driver):
 	
 def fillformM(driver, wh, period, inputs):
 	counter = 0
+	
+	#in case if period starts from Sat/Sun
+	for x in range(len(inputs)):
+		fillEl(driver, 'B22_'+str(x+1)+'_0', 0)
+	
 	for day in wh:
 		if (day['date'].weekday != 5) or (day['date'].weekday != 6):
 			print(day)
@@ -322,7 +327,6 @@ def fillformM(driver, wh, period, inputs):
 						return None
 
 
-	
 	driver.save_screenshot("screenshot.png")
 	driver = pressButtonX(driver, '//button[@title="Save"]')
 	driver.save_screenshot("screenshot2.png")
