@@ -788,5 +788,5 @@ def refresh_auth(user_name, password):
 		settings['password'] = password
 		headers_map['Authorization'] = 'Bearer '+settings['bearer']['bearer']
 		headers['Authorization'] = settings['basic']
-		save_settings()
+		save_settings(settings)
 		return settings
