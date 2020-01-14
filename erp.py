@@ -237,12 +237,13 @@ def selectTemplate(driver, template):
 		
 	return driver
 	
-def fillEl(driver, id, value):
+def fillEl(driver, id, value = None):
 	print("Set "+str(id) + " = " + str(value))
 	try:
 		button = driver.find_element_by_id(id)
 		button.clear()
-		button.send_keys(value)
+		if not (value is None):
+			button.send_keys(value)
 	except Exception as e:
 		print (str(e))
 		driver.close()
@@ -304,7 +305,7 @@ def fillformM(driver, wh, period, inputs):
 	
 	#in case if period starts from Sat/Sun
 	for x in range(len(inputs)):
-		fillEl(driver, 'B22_'+str(x+1)+'_0', 0)
+		fillEl(driver, 'B22_'+str(x+1)+'_0')
 	
 	for day in wh:
 		if (day['date'].weekday != 5) or (day['date'].weekday != 6):
@@ -313,7 +314,7 @@ def fillformM(driver, wh, period, inputs):
 				print((period['start'] + timedelta(days = counter)))
 				counter += 1
 				for x in range(len(inputs)):
-					fillEl(driver, 'B22_'+str(x+1)+'_'+str(counter), 0)
+					fillEl(driver, 'B22_'+str(x+1)+'_'+str(counter))
 			
 			print((period['start'] + timedelta(days = counter)))
 			val = 8
